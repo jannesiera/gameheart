@@ -1,2 +1,2 @@
 # gameheart
-A serious game loop in javascript with node.js
+A fixed timestep / variable rendering game loop in javascript with node.js
