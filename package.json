@@ -1,0 +1,25 @@
+{
+  "name": "gameheart",
+  "version": "0.0.1",
+  "description": "A fixed timestep game loop with variable fps",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jannesiera/gameheart.git"
+  },
+  "keywords": [
+    "timestep",
+    "game",
+    "loop",
+    "fps"
+  ],
+  "author": "Janne Siera <janne@siera.be> (http://twitter.com/jannesiera)",
+  "license": "GNU GPL v2.0",
+  "bugs": {
+    "url": "https://github.com/jannesiera/gameheart/issues"
+  },
+  "homepage": "https://github.com/jannesiera/gameheart"
+}
