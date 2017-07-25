@@ -3,35 +3,39 @@
  
 // After render or update determine what process to call next based on real time passed
 var queueNextAction = function() {
-  var framesSkipped = Math.floor((currentTime - nextFrame) / mSecFrame) || 0;
+  var framesSkipped = Math.floor((currentTime - this.nextFrame) / this.mSecFrame) || 0;
   
   // 1. if we skipped to many frames, force a render
-  if(maxSkippedFrames >= framesSkipped) {
-    setImmediate(this.processFrame.call(this, framesSkipped));
+  if(this.maxSkippedFrames >= framesSkipped) {
+    setTimeout(
+      function(){
+        processFrame.call(this, framesSkipped)
+      }.bind(this),0
+    );
     return; // exit
   }
   
   // 2. if we passed the next tick already, call processTick on that one
-  if(nextTick <= currentTime) {
+  if(this.nextTick <= currentTime) {
     var that = this;
-    setImmediate(function() {
-      call.processTick(that);
-    });
+    setTimeout(function() {
+      processTick.call(that);
+    }.bind(this),0);
     return; // exit
   }
   
   // 3. if we passed a frame, render the frame
-  if(nextFrame <= currentTime) {
+  if(this.nextFrame <= currentTime) {
     var that = this;
-    setImmediate(function() {
+    setTimeout(function() {
       processFrame.call(that, framesSkipped);
-    });
+    }.bind(this),0);
     return; // exit
   }
   
   // 4. we have real time left, timeout till next tick or frame
   var currentTime = new Date().getTime();
-  if(nextTick <= nextFrame) { // tick is next
+  if(this.nextTick <= this.nextFrame) { // tick is next
     var timeLeft = this.nextTick - currentTime;
     var that = this;
     setTimeout(function() {
@@ -48,14 +52,14 @@ var queueNextAction = function() {
   }
 }
 
-var processTick = function() {
+function processTick() {
   var currentTime = new Date().getTime();
   this.nextTick += this.mSecTick; // define next tick
   this.update(this.mSecTick, currentTime); // call the actual update function
   queueNextAction.call(this); // queue next action
 }
 
-var processFrame = function(framesSkipped) {
+function processFrame(framesSkipped) {
   this.nextFrame += framesSkipped * this.mSecFrame; // in case frames have been skipped, set nextFrame accordingly
   this.lastFrame = this.nextFrame;
   this.nextFrame += this.mSecFrame; // Increment nextFrame
@@ -69,7 +73,7 @@ var processFrame = function(framesSkipped) {
   queueNextAction.call(this); // queue next action
 }
 
-var calculateFps = function() {
+function calculateFps() {
   var currentTime = new Date().getTime();
   this.fps = 1 / (currentTime - this.lastFrame);
 }
@@ -78,7 +82,7 @@ var calculateFps = function() {
 
 module.exports = Gameheart;
 function Gameheart(mSecTick, maxFps, maxSkippedFrames, update, render) {
-  this.mSecTick = mSecFrame; // Milliseconds inbetween update ticks
+  this.mSecTick = mSecTick; // Milliseconds inbetween update ticks
   this.maxFps = maxFps; // Cap on render actions per second (usually 60)
   this.mSecFrame = Math.floor(1000 / maxFps); // Milliseconds inbetween frames (when non are skipped) - calculated by maxFps
   this.maxSkippedFrames = maxSkippedFrames; // Max render frames to be skipped before we draw another one in favor of "catching up" on ticks
@@ -94,11 +98,11 @@ function Gameheart(mSecTick, maxFps, maxSkippedFrames, update, render) {
 
 Gameheart.prototype.start = function() {
   var currentTime = new Date().getTime();
-  this.nextTick = currentTime + mSecTick;
+  this.nextTick = currentTime + this.mSecTick;
   this.update();
   
   currentTime = new Date().getTime();
-  this.nextFrame = currentTime + mSecFrame;
+  this.nextFrame = currentTime + this.mSecFrame;
   this.render();
   
   queueNextAction.call(this);
